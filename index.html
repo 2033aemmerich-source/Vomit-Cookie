@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VOMIT COOKIE</title>
+<style>
+  body {
+    background: #000;
+    color: #fff;
+    font-family: monospace;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+  canvas {
+    display: block;
+    margin: 20px auto;
+    background: #111;
+    image-rendering: pixelated;
+    border: 2px solid #333;
+  }
+  .small {
+    font-size: 14px;
+  }
+  #points {
+    font-size: 18px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>VOMIT COOKIE</h1>
+<div class="small">GALLET A DE VÓMITO</div>
+
+<canvas id="game" width="256" height="256"></canvas>
+
+<div id="text-en">Press A to eat a bite of the vomit cookie!</div>
+<div id="text-es" class="small">
+  Presiona A para comer un bocado de la galleta de vómito.
+</div>
+
+<div id="points">Vomit Cookie Points: 0</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let bites = 0;
+const maxBites = 7;
+let points = 0; // Vomit Cookie Points
+
+// Speak "voomit coookie" slower and deeper
+function speakVomitCookie() {
+  if ('speechSynthesis' in window) {
+    const msg = new SpeechSynthesisUtterance("vomit cookie");
+    msg.rate = 0.4;   // slower
+    msg.pitch = 0.001;  // deeper
+    window.speechSynthesis.speak(msg);
+  }
+}
+
+// Draw cookie with first nibble, gradual bite progression
+function drawCookie(biteLevel) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const centerX = 128;
+  const centerY = 128;
+
+  // Cookie base
+  ctx.fillStyle = "#4caf50"; // vomit green
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Chocolate chips
+  ctx.fillStyle = "#2e7d32";
+  const chips = [
+    [90, 100], [140, 90], [110, 140],
+    [150, 150], [100, 160], [160, 120]
+  ];
+  chips.forEach(([x, y]) => {
+    ctx.beginPath();
+    ctx.arc(x, y, 6, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Bites
+  const biteDistance = 60;
+  for (let i = 0; i < biteLevel; i++) {
+    const angle = (i / maxBites) * Math.PI * 2;
+    const x = centerX + Math.cos(angle) * biteDistance;
+    const y = centerY + Math.sin(angle) * biteDistance;
+
+    let biteRadius;
+    if (i === 0) {
+      biteRadius = 32; // first bite small
+    } else if (i === 2) {
+      biteRadius = 71; // third bite slightly bigger
+    } else {
+      biteRadius = 88; // all other bites big
+    }
+
+    ctx.fillStyle = "#111";
+    ctx.beginPath();
+    ctx.arc(x, y, biteRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function resetGame() {
+  bites = 0;
+  document.getElementById("text-en").textContent =
+    "Press A to eat a bite of the vomit cookie!";
+  document.getElementById("text-es").textContent =
+    "Presiona A para comer un bocado de la galleta de vómito.";
+  drawCookie(bites);
+}
+
+function finishGame() {
+  points++; // add Vomit Cookie Point
+  document.getElementById("points").textContent = "Vomit Cookie Points: " + points;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  document.getElementById("text-en").textContent =
+    "You ate the vomit cookie! Here, have another!";
+  document.getElementById("text-es").textContent =
+    "¡Te comiste la galleta de vómito! ¡Aquí tienes otra!";
+  setTimeout(resetGame, 2000);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "a") {
+    bites++;
+    drawCookie(bites);
+    speakVomitCookie(); // voice on every bite
+    if (bites >= maxBites) {
+      finishGame();
+    }
+  }
+});
+
+resetGame();
+</script>
+
+</body>
+</html>
